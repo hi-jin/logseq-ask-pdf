@@ -1,5 +1,3 @@
 # Logseq Ask PDF plugin
 
-<video controls>
-    <source src="demo.mp4" type="video/mp4">
-</video>
+https://github.com/user-attachments/assets/dae7ad0c-9411-43bd-ac7c-ee25bbeb5540
