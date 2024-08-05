@@ -1,5 +1,7 @@
 # Logseq Ask PDF Plugin
 
+<img src="icon.png" width="100px">
+
 A Logseq plugin that allows you to ask questions about PDF highlights (text or images) using Large Language Models (LLMs).
 
 https://github.com/user-attachments/assets/7c04e68b-e76d-48fb-8af0-e2ca4abeab87
