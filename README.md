@@ -4,6 +4,9 @@ A Logseq plugin that allows you to ask questions about PDF highlights (text or i
 
 https://github.com/user-attachments/assets/7c04e68b-e76d-48fb-8af0-e2ca4abeab87
 
+> [!Important]
+> This plugin is under active development. Contributions and pull requests are highly welcome!
+
 ## Features
 
 - Ask questions about PDF highlights directly within Logseq
@@ -32,11 +35,8 @@ Before using the plugin, you need to set up your OpenAI API key:
 3. Type `/ask pdf` in that block
 4. Wait for the LLM to generate a response
 
-> **Note:** You can move your cursor or continue working in Logseq while the response is being generated.
-
-## Development Status
-
-This plugin is under active development. Contributions and pull requests are highly welcome!
+> [!Note]
+> You can move your cursor or continue working in Logseq while the response is being generated.
 
 ## License
 
