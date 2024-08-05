@@ -53,4 +53,4 @@ MIT
 
 ## Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/hi-jin/logseq-ask-pdf-plugin/issues) on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/hi-jin/logseq-ask-pdf/issues) on [GitHub](https://github.com/hi-jin/logseq-ask-pdf).
