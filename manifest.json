@@ -1,15 +1,10 @@
 {
     "title": "Logseq Ask PDF",
-    "description": "A plugin that allows you to ask questions about PDF highlights using Large Language Models (llm)",
+    "description": "A plugin that allows you to ask questions about PDF highlights using Large Language Models (LLM)",
     "author": "hi-jin",
     "repo": "hi-jin/logseq-ask-pdf",
     "icon": "icon.png",
-    "effect": false,
     "theme": false,
     "sponsors": [],
-    "logseq": {
-      "id": "_0nx9tl4pj",
-      "icon": "icon.png"
-    },
-    "version": "0.1.0"
+    "effect": false
   }
