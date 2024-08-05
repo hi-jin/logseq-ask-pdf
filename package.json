@@ -1,6 +1,6 @@
 {
   "name": "logseq-ask-pdf",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "dist/index.html",
   "type": "module",
   "scripts": {
@@ -8,10 +8,16 @@
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "llm",
+    "LLM",
+    "chatbot",
+    "pdf",
+    "ask"
+  ],
+  "author": "hi-jin",
+  "license": "MIT",
+  "description": "A plugin that allows you to ask questions about PDF highlights using Large Language Models (LLM)",
   "devDependencies": {
     "typescript": "^5.5.4",
     "vite": "^5.3.5"
@@ -29,6 +35,7 @@
   "logseq": {
     "main": "dist/index.html",
     "title": "logseq-ask-pdf",
+    "icon": "icon.png",
     "id": "_0nx9tl4pj"
   }
 }
