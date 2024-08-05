@@ -2,12 +2,21 @@
 
 A Logseq plugin that allows you to ask questions about PDF highlights (text or images) using Large Language Models (LLMs).
 
+## Demo
+
 ![demo](demo.gif)
 
-demo:  
-https://github.com/user-attachments/assets/7c04e68b-e76d-48fb-8af0-e2ca4abeab87
+> [!Note]  
+> The demo video uses the following paper as an example:  
+>   
+> Frans, K., Park, S., Abbeel, P., & Levine, S. (2024). Unsupervised Zero-Shot Reinforcement Learning via Functional Reward Encodings. arXiv preprint arXiv:2402.17135.  
+> URL: [https://arxiv.org/abs/2402.17135](https://arxiv.org/abs/2402.17135)  
+> This paper is used for **demonstration purposes only** and is not affiliated with this plugin's development.
 
-> [!Important]
+[Demo Video](https://github.com/user-attachments/assets/7c04e68b-e76d-48fb-8af0-e2ca4abeab87)
+
+
+> [!Important]  
 > This plugin is under active development. Contributions and pull requests are highly welcome!
 
 ## Features
