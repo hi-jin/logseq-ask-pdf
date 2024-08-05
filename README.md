@@ -1,3 +1,3 @@
 # Logseq Ask PDF plugin
 
-https://github.com/user-attachments/assets/dae7ad0c-9411-43bd-ac7c-ee25bbeb5540
+https://github.com/user-attachments/assets/7c04e68b-e76d-48fb-8af0-e2ca4abeab87
