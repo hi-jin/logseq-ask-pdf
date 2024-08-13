@@ -13,7 +13,7 @@ async function main() {
 
     logseq.Editor.registerSlashCommand(
         "test",
-        async function (_) {
+        async () => {
             test();
         }
     )
