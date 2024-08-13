@@ -9,9 +9,7 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
     const btn = document.createElement("button");
 
     fileInput.type = "file";
-    fileInput.style.display = "none";
     fileInput.webkitdirectory = true;
-    document.body.appendChild(fileInput);
 
     // Extract filename from file path
     const fileName = pdfPath.split('/').pop()?.split('.')[0];
@@ -19,15 +17,6 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
         console.error("Invalid file path");
         return null;
     }
-
-    const readFile = (file: File): Promise<ArrayBuffer> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target!.result as ArrayBuffer);
-            reader.onerror = (e) => reject(e);
-            reader.readAsArrayBuffer(file);
-        });
-    };
 
     return new Promise((resolve) => {
         fileInput.onchange = async () => {
@@ -38,11 +27,11 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
             if (pdfFile && ednFile) {
                 try {
                     // Process PDF file
-                    const pdfArrayBuffer = await readFile(pdfFile);
+                    const pdfArrayBuffer = await pdfFile.arrayBuffer();
                     const pdf = new Blob([new Uint8Array(pdfArrayBuffer)], { type: "application/pdf" });
 
                     // Process EDN file
-                    const ednArrayBuffer = await readFile(ednFile);
+                    const ednArrayBuffer = await ednFile.arrayBuffer();
                     const ednText = new TextDecoder().decode(ednArrayBuffer);
                     const edn = parseEDNString(ednText, { mapAs: "object", keywordAs: "string" }) as { "highlights": [] };
 
@@ -55,22 +44,13 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
                 alert(`Please check if the pdfPath is valid.`);
                 resolve(null);
             }
-
-            // Clean up
-            document.body.removeChild(fileInput);
-            document.body.removeChild(btn);
         };
 
-        btn.style.display = "none";
-        document.body.appendChild(btn);
         btn.addEventListener("click", () => {
             fileInput.click();
         });
 
-        // Show alert to user before opening file dialog
         alert(`Select 'assets' folder under your logseq directory.`);
-
-        // Programmatically click the button
         btn.click();
     });
 }
