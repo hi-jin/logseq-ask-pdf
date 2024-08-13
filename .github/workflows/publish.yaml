@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@latest
       - name: Build
         id: build
         run: |
