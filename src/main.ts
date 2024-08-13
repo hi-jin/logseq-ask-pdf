@@ -3,13 +3,20 @@ import settingUI from "./settings";
 import { Buffer } from 'buffer'
 import { invoke, readOpenAiAPIKey, storePdfOnVectorStore } from "./openai";
 import { findPageProperty } from "./page";
-import { findHighlightFromEdnByUuid, findUuidOfCurrentLine, getPdfAndEdnByPdfPath } from "./pdf";
+import { findHighlightFromEdnByUuid, findUuidOfCurrentLine, getPdfAndEdnByPdfPath, test } from "./pdf";
 
 globalThis.Buffer = Buffer
 
 
 async function main() {
     settingUI();
+
+    logseq.Editor.registerSlashCommand(
+        "test",
+        async () => {
+            test();
+        }
+    )
 
     logseq.Editor.registerSlashCommand(
         "ask pdf",

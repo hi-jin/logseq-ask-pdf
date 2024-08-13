@@ -56,6 +56,22 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
     });
 }
 
+export async function test() {
+    const fileInput = document.createElement("input");
+    const btn = document.createElement("button");
+
+    fileInput.type = "file";
+    fileInput.onchange = async () => {
+        const file = fileInput.files;
+        console.log(file);
+    };
+
+    btn.addEventListener("click", () => {
+        fileInput.click();
+    });
+    btn.click();
+}
+
 export function findUuidOfCurrentLine(line: string) {
     const regex = /\(\((.*?)\)\)/;
     const match = line.match(regex);
