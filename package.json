@@ -1,6 +1,6 @@
 {
   "name": "logseq-ask-pdf",
-  "version": "0.1.2",
+  "version": "0.1.13",
   "main": "dist/index.html",
   "type": "module",
   "scripts": {
