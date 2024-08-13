@@ -4,30 +4,73 @@ import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
 
-export async function getPdfAndEdnByPdfPath(pdfPath: string) {
-    const assetPath = await logseq.Assets.makeUrl(pdfPath);
-    const filePath = assetPath.replace("assets", "file");
-    const ednPath = filePath.replace(".pdf", ".edn");
+export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blob; edn: any } | null> {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.style.display = "none";
+    fileInput.webkitdirectory = true;
+    document.body.appendChild(fileInput);
 
-    let fileResponse;
-    let ednResponse;
-
-    try {
-        fileResponse = await fetch(filePath);
-        ednResponse = await fetch(ednPath);
-    } catch {
+    // 파일 경로에서 파일명 추출
+    const fileName = pdfPath.split('/').pop()?.split('.')[0];
+    if (!fileName) {
+        console.error("Invalid file path");
         return null;
     }
 
-    const fileArrayBuffer = await fileResponse.arrayBuffer();
-    const fileUint8Array = new Uint8Array(fileArrayBuffer);
-    const pdf = new Blob([fileUint8Array], { type: "application/pdf" });
-    const edn = parseEDNString(
-        await ednResponse.text(),
-        { mapAs: "object", keywordAs: "string" },
-    ) as { "highlights": [] };
+    const readFile = (file: File): Promise<ArrayBuffer> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target!.result as ArrayBuffer);
+            reader.onerror = (e) => reject(e);
+            reader.readAsArrayBuffer(file);
+        });
+    };
 
-    return { pdf, edn };
+    const selectFiles = (): Promise<{ pdfFile: File, ednFile: File } | null> => {
+        return new Promise((resolve) => {
+            fileInput.onchange = () => {
+                const files = Array.from(fileInput.files!);
+                const pdfFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.pdf'));
+                const ednFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.edn'));
+
+                if (pdfFile && ednFile) {
+                    resolve({ pdfFile, ednFile });
+                } else {
+                    alert(`Please check if the pdfPath is valid.`);
+                    resolve(null);
+                }
+            };
+            fileInput.click();
+        });
+    };
+
+    try {
+        alert(`Select 'assets' folder under your logseq directory.`);
+
+        const selectedFiles = await selectFiles();
+        if (!selectedFiles) {
+            throw new Error("Please check if the pdfPath is valid.");
+        }
+
+        const { pdfFile, ednFile } = selectedFiles;
+
+        // PDF 파일 처리
+        const pdfArrayBuffer = await readFile(pdfFile);
+        const pdf = new Blob([new Uint8Array(pdfArrayBuffer)], { type: "application/pdf" });
+
+        // EDN 파일 처리
+        const ednArrayBuffer = await readFile(ednFile);
+        const ednText = new TextDecoder().decode(ednArrayBuffer);
+        const edn = parseEDNString(ednText, { mapAs: "object", keywordAs: "string" }) as { "highlights": [] };
+
+        document.body.removeChild(fileInput);
+        return { pdf, edn };
+    } catch (error) {
+        console.error("Error reading files:", error);
+        document.body.removeChild(fileInput);
+        return null;
+    }
 }
 
 export function findUuidOfCurrentLine(line: string) {
