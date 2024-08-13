@@ -114,7 +114,7 @@ function resizeCanvas(canvas: HTMLCanvasElement, maxArea: number): HTMLCanvasEle
 // Canvas를 base64로 변환하는 함수
 function canvasToBase64(canvas: HTMLCanvasElement): string {
     const resizedCanvas = resizeCanvas(canvas, 15000);
-    return resizedCanvas.toDataURL('image/jpeg').split(',')[1] ?? "";
+    return resizedCanvas.toDataURL('image/jpeg').split(',')[1];
 }
 
 export async function captureImageFromPDF(pdfBlob: Blob, position: Highlight['position']) {

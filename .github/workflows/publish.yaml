@@ -14,11 +14,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - uses: pnpm/action-setup@latest
       - name: Build
         id: build
         run: |
-          pnpm i && pnpm run build
+          npm ci && npm run build
           mkdir ${{ env.PLUGIN_NAME }}
           cp README.md package.json manifest.json ${{ env.PLUGIN_NAME }}
           mv dist ${{ env.PLUGIN_NAME }}
