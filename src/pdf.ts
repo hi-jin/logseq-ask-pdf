@@ -6,12 +6,14 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 
 export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blob; edn: any } | null> {
     const fileInput = document.createElement("input");
+    const btn = document.createElement("button");
+
     fileInput.type = "file";
     fileInput.style.display = "none";
     fileInput.webkitdirectory = true;
     document.body.appendChild(fileInput);
 
-    // 파일 경로에서 파일명 추출
+    // Extract filename from file path
     const fileName = pdfPath.split('/').pop()?.split('.')[0];
     if (!fileName) {
         console.error("Invalid file path");
@@ -27,50 +29,50 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
         });
     };
 
-    const selectFiles = (): Promise<{ pdfFile: File, ednFile: File } | null> => {
-        return new Promise((resolve) => {
-            fileInput.onchange = () => {
-                const files = Array.from(fileInput.files!);
-                const pdfFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.pdf'));
-                const ednFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.edn'));
+    return new Promise((resolve) => {
+        fileInput.onchange = async () => {
+            const files = Array.from(fileInput.files!);
+            const pdfFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.pdf'));
+            const ednFile = files.find(file => file.name.includes(fileName) && file.name.endsWith('.edn'));
 
-                if (pdfFile && ednFile) {
-                    resolve({ pdfFile, ednFile });
-                } else {
-                    alert(`Please check if the pdfPath is valid.`);
+            if (pdfFile && ednFile) {
+                try {
+                    // Process PDF file
+                    const pdfArrayBuffer = await readFile(pdfFile);
+                    const pdf = new Blob([new Uint8Array(pdfArrayBuffer)], { type: "application/pdf" });
+
+                    // Process EDN file
+                    const ednArrayBuffer = await readFile(ednFile);
+                    const ednText = new TextDecoder().decode(ednArrayBuffer);
+                    const edn = parseEDNString(ednText, { mapAs: "object", keywordAs: "string" }) as { "highlights": [] };
+
+                    resolve({ pdf, edn });
+                } catch (error) {
+                    console.error("Error reading files:", error);
                     resolve(null);
                 }
-            };
+            } else {
+                alert(`Please check if the pdfPath is valid.`);
+                resolve(null);
+            }
+
+            // Clean up
+            document.body.removeChild(fileInput);
+            document.body.removeChild(btn);
+        };
+
+        btn.style.display = "none";
+        document.body.appendChild(btn);
+        btn.addEventListener("click", () => {
             fileInput.click();
         });
-    };
 
-    try {
+        // Show alert to user before opening file dialog
         alert(`Select 'assets' folder under your logseq directory.`);
 
-        const selectedFiles = await selectFiles();
-        if (!selectedFiles) {
-            throw new Error("Please check if the pdfPath is valid.");
-        }
-
-        const { pdfFile, ednFile } = selectedFiles;
-
-        // PDF 파일 처리
-        const pdfArrayBuffer = await readFile(pdfFile);
-        const pdf = new Blob([new Uint8Array(pdfArrayBuffer)], { type: "application/pdf" });
-
-        // EDN 파일 처리
-        const ednArrayBuffer = await readFile(ednFile);
-        const ednText = new TextDecoder().decode(ednArrayBuffer);
-        const edn = parseEDNString(ednText, { mapAs: "object", keywordAs: "string" }) as { "highlights": [] };
-
-        document.body.removeChild(fileInput);
-        return { pdf, edn };
-    } catch (error) {
-        console.error("Error reading files:", error);
-        document.body.removeChild(fileInput);
-        return null;
-    }
+        // Programmatically click the button
+        btn.click();
+    });
 }
 
 export function findUuidOfCurrentLine(line: string) {
