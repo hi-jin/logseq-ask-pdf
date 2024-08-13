@@ -9,7 +9,8 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
     const btn = document.createElement("button");
 
     fileInput.type = "file";
-    fileInput.webkitdirectory = true;
+    fileInput.setAttribute("webkitdirectory", "");
+    fileInput.setAttribute("directory", "");
 
     // Extract filename from file path
     const fileName = pdfPath.split('/').pop()?.split('.')[0];
@@ -50,7 +51,7 @@ export async function getPdfAndEdnByPdfPath(pdfPath: string): Promise<{ pdf: Blo
             fileInput.click();
         });
 
-        alert(`Select 'assets' folder under your logseq directory.`);
+        // alert(`Select 'assets' folder under your logseq directory.`);
         btn.click();
     });
 }
