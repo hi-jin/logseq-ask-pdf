@@ -1,12 +1,14 @@
 {
   "name": "logseq-ask-pdf",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "main": "dist/index.html",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev:start": "pnpm add @logseq/libs -S && pnpm add @types/eslint @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint eslint-config-prettier eslint-plugin-prettier prettier vite vite-plugin-logseq vite-tsconfig-paths typescript -D",
+    "dev:tailwind": "pnpm add tailwindcss cssnano autoprefixer -D && touch tailwind.config.js && touch .postcssrc.cjs && touch src/tailwind.css",
+    "dev": "npx vite",
+    "build": "npx tsc && npx vite build",
+    "preview": "npx vite preview"
   },
   "keywords": [
     "llm",
@@ -19,13 +21,24 @@
   "license": "MIT",
   "description": "A plugin that allows you to ask questions about PDF highlights using Large Language Models (LLM)",
   "devDependencies": {
-    "typescript": "^5.5.4",
-    "vite": "^5.3.5"
+    "@types/eslint": "^8.44.3",
+    "@types/node": "^20.8.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vite-plugin-logseq": "^1.1.2",
+    "vite-tsconfig-paths": "^4.2.1"
   },
   "dependencies": {
     "@langchain/community": "^0.2.23",
+    "@langchain/core": "^0.2.23",
     "@langchain/openai": "^0.2.5",
-    "@logseq/libs": "^0.0.17",
+    "@logseq/libs": "^0.0.15",
     "@types/node": "^22.1.0",
     "buffer": "^6.0.3",
     "edn-data": "^1.1.2",
@@ -35,7 +48,7 @@
   "logseq": {
     "main": "dist/index.html",
     "title": "logseq-ask-pdf",
-    "icon": "icon.png",
+    "icon": "./icon.png",
     "id": "_0nx9tl4pj"
   }
 }
