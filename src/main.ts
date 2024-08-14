@@ -71,8 +71,11 @@ async function main() {
             }
 
             if (!maybeVectorStore) {
+                console.log("new vector store created");
                 maybeVectorStore = await storePdfOnVectorStore(pdf, openaiApiKey);
                 vectorStoreCache.set(pdfPath, maybeVectorStore);
+            } else {
+                console.log("use vector store cache");
             }
 
             const vectorStore = maybeVectorStore;
@@ -84,7 +87,7 @@ async function main() {
 
             const chatResponse = await invoke(highlight, pdf, openaiApiKey, vectorStore);
 
-            if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock);
+            if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock.uuid);
             if (chatResponse) {
                 ///////////////////////////////
                 // write the answer under the current block
