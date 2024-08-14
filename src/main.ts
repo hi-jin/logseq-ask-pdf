@@ -4,12 +4,15 @@ import { Buffer } from 'buffer'
 import { invoke, readOpenAiAPIKey, storePdfOnVectorStore } from "./openai";
 import { findPageProperty } from "./page";
 import { findHighlightFromEdnByUuid, findUuidOfCurrentLine, getPdfAndEdnByPdfPath } from "./pdf";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
 globalThis.Buffer = Buffer
 
 
 async function main() {
     settingUI();
+
+    let vectorStoreCache: Map<String, MemoryVectorStore> = new Map();
 
     logseq.Editor.registerSlashCommand(
         "ask pdf",
@@ -62,24 +65,36 @@ async function main() {
             ///////////////////////////////
             // upload pdf to langchain vec db
             ///////////////////////////////
-            const vectorStore = await storePdfOnVectorStore(pdf, openaiApiKey);
+            let maybeVectorStore: MemoryVectorStore | undefined = undefined;
+            if (vectorStoreCache.has(pdfPath)) {
+                maybeVectorStore = vectorStoreCache.get(pdfPath);
+            }
+
+            if (!maybeVectorStore) {
+                maybeVectorStore = await storePdfOnVectorStore(pdf, openaiApiKey);
+                vectorStoreCache.set(pdfPath, maybeVectorStore);
+            }
+
+            const vectorStore = maybeVectorStore;
 
             ///////////////////////////////
             // ask to gpt
             ///////////////////////////////
+            const loadingBlock = await logseq.Editor.insertBlock(currentBlock.uuid, "LOADING.....");
 
             const chatResponse = await invoke(highlight, pdf, openaiApiKey, vectorStore);
-            if (!chatResponse) {
-                await logseq.UI.showMsg(`Please retry`, "error");
-                return;
-            }
 
-            ///////////////////////////////
-            // write the answer under the current block
-            ///////////////////////////////
-            for (const line of chatResponse.answer.split("\n")) {
-                if (line.trim() === "") continue;
-                await logseq.Editor.insertBlock(currentBlock.uuid, line);
+            if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock);
+            if (chatResponse) {
+                ///////////////////////////////
+                // write the answer under the current block
+                ///////////////////////////////
+                for (const line of chatResponse.answer.split("\n")) {
+                    if (line.trim() === "") continue;
+                    await logseq.Editor.insertBlock(currentBlock.uuid, line);
+                }
+            } else {
+                await logseq.UI.showMsg(`Please retry`, "error");
             }
         },
     )
