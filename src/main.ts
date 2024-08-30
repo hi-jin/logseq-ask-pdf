@@ -89,10 +89,16 @@ async function main() {
 
             if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock.uuid);
             if (chatResponse) {
+                const chatResponseLine = chatResponse.answer.trim().split("\n");
+
+                // remove first ``` and last ```
+                if (chatResponseLine[0].trim().startsWith("```")) chatResponseLine.shift();
+                if (chatResponseLine[chatResponseLine.length - 1].trim().startsWith("```")) chatResponseLine.pop();
+
                 ///////////////////////////////
                 // write the answer under the current block
                 ///////////////////////////////
-                for (const line of chatResponse.answer.split("\n")) {
+                for (const line of chatResponseLine) {
                     if (line.trim() === "") continue;
                     await logseq.Editor.insertBlock(currentBlock.uuid, line);
                 }

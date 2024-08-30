@@ -71,28 +71,57 @@ function resizeCanvas(canvas: HTMLCanvasElement, maxArea: number): HTMLCanvasEle
 
 // Canvas를 base64로 변환하는 함수
 function canvasToBase64(canvas: HTMLCanvasElement): string {
-    const resizedCanvas = resizeCanvas(canvas, 15000);
-    return resizedCanvas.toDataURL('image/jpeg').split(',')[1];
+    const resizedCanvas = resizeCanvas(canvas, 250000);
+    return resizedCanvas.toDataURL('image/jpeg');
 }
 
 export async function captureImageFromPDF(pdfBlob: Blob, position: Highlight['position']) {
     const pdf = await pdfjs.getDocument(await pdfBlob.arrayBuffer()).promise;
     const page = await pdf.getPage(position.page);
-    const viewport = page.getViewport({ scale: 1 });
+
+    // 캡처 시점의 PDF 크기
+    const captureWidth = position.bounding.width;
+    const captureHeight = position.bounding.height;
+
+    // 렌더링 스케일 (고해상도를 위해)
+    const renderScale = 2;
+
+    const viewport = page.getViewport({ scale: renderScale });
+
     const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
     const context = canvas.getContext('2d');
     if (!context) return null;
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+
     await page.render({ canvasContext: context, viewport: viewport }).promise;
+
     const { x1, y1, x2, y2 } = position.bounding;
-    const width = x2 - x1;
-    const height = y2 - y1;
+
+    // 상대 좌표 계산
+    const relativeX1 = x1 / captureWidth;
+    const relativeY1 = y1 / captureHeight;
+    const relativeX2 = x2 / captureWidth;
+    const relativeY2 = y2 / captureHeight;
+
+    // 렌더링된 캔버스에서의 실제 좌표 계산
+    const startX = relativeX1 * viewport.width;
+    const startY = relativeY1 * viewport.height; // Y축 좌표 수정
+    const width = (relativeX2 - relativeX1) * viewport.width;
+    const height = (relativeY2 - relativeY1) * viewport.height;
+
     const extractedCanvas = document.createElement('canvas');
     extractedCanvas.width = width;
     extractedCanvas.height = height;
     const extractedContext = extractedCanvas.getContext('2d');
     if (!extractedContext) return null;
-    extractedContext.drawImage(canvas, x1, y1, width, height, 0, 0, width, height);
+
+    // 이미지 추출
+    extractedContext.drawImage(
+        canvas,
+        startX, startY, width, height,
+        0, 0, width, height
+    );
+
     return canvasToBase64(extractedCanvas);
 }
