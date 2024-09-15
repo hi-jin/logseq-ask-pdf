@@ -1,7 +1,7 @@
 import "@logseq/libs";
 import settingUI from "./settings";
 import { Buffer } from 'buffer'
-import { invoke, readOpenAiAPIKey, storePdfOnVectorStore } from "./openai";
+import { invoke, readOpenAiAPIKey, readEmbeddingModelHost, readEmbeddingModel, readLLMModelHost, readLLMModel, storePdfOnVectorStore } from "./openai";
 import { findPageProperty } from "./page";
 import { findHighlightFromEdnByUuid, findUuidOfCurrentLine, getPdfAndEdnByPdfPath } from "./pdf";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
@@ -24,6 +24,10 @@ async function main() {
             // check openai api key exist in settings
             ///////////////////////////////
             const openaiApiKey = readOpenAiAPIKey();
+            const embeddingModelHost = readEmbeddingModelHost();
+            const embeddingModel = readEmbeddingModel();
+            const llmModelHost = readLLMModelHost();
+            const llmModel = readLLMModel();
             if (!openaiApiKey) {
                 await logseq.UI.showMsg("OpenAI API key is not set. Please set it in the plugin settings.", "error")
                 return
@@ -72,7 +76,7 @@ async function main() {
 
             if (!maybeVectorStore) {
                 console.log("new vector store created");
-                maybeVectorStore = await storePdfOnVectorStore(pdf, openaiApiKey);
+                maybeVectorStore = await storePdfOnVectorStore(pdf, openaiApiKey, embeddingModelHost, embeddingModel);
                 vectorStoreCache.set(pdfPath, maybeVectorStore);
             } else {
                 console.log("use vector store cache");
@@ -85,7 +89,7 @@ async function main() {
             ///////////////////////////////
             const loadingBlock = await logseq.Editor.insertBlock(currentBlock.uuid, "LOADING.....");
 
-            const chatResponse = await invoke(highlight, pdf, openaiApiKey, vectorStore);
+            const chatResponse = await invoke(highlight, pdf, openaiApiKey, llmModelHost, llmModel, vectorStore);
 
             if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock.uuid);
             if (chatResponse) {

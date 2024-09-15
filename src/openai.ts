@@ -11,13 +11,33 @@ import { createRetrievalChain } from "langchain/chains/retrieval";
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
 export function readOpenAiAPIKey(): string | null {
-    const openaiApiKey = (logseq.settings as any)["openaiApiKey"] ?? logseq.settings?.["openaiApiKey"] ?? null;
-
-    return openaiApiKey;
+    return (logseq.settings as any)["openaiApiKey"] ?? logseq.settings?.["openaiApiKey"] ?? null;
 }
 
-export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string) {
-    const embeddings = new OpenAIEmbeddings({ openAIApiKey: openaiApiKey, model: "text-embedding-3-small" });
+export function readEmbeddingModelHost(): string | null {
+    return (logseq.settings as any)["embeddingModelHost"] ?? logseq.settings?.["embeddingModelHost"];
+}
+
+export function readEmbeddingModel(): string {
+    return (logseq.settings as any)["embeddingModel"] ?? logseq.settings?.["embeddingModel"] ?? "text-embedding-3-small";
+}
+
+export function readLLMModelHost(): string | null {
+    return (logseq.settings as any)["llmModelHost"] ?? logseq.settings?.["llmModelHost"];
+}
+
+export function readLLMModel(): string {
+    return (logseq.settings as any)["llmModel"] ?? logseq.settings?.["llmModel"] ?? "gpt-4o-mini";
+}
+
+export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string, embeddingModelHost: string | null, embeddingModel: string) {
+    const embeddings = new OpenAIEmbeddings({
+        openAIApiKey: openaiApiKey,
+        model: embeddingModel,
+        configuration: embeddingModelHost ? {
+            baseURL: embeddingModelHost,
+        } : undefined
+    });
     const loader = new PDFLoader(pdf, {
         pdfjs: () => pdfjs as any,
     });
@@ -31,10 +51,13 @@ export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string) {
     return vectorStore;
 }
 
-export async function invoke(highlight: Highlight, pdf: Blob, openaiApiKey: string, vectorStore: MemoryVectorStore) {
+export async function invoke(highlight: Highlight, pdf: Blob, openaiApiKey: string, llmModelHost: string | null, llmModel: string, vectorStore: MemoryVectorStore) {
     const llm = new ChatOpenAI({
         openAIApiKey: openaiApiKey,
-        model: "gpt-4o-mini",
+        model: llmModel,
+        configuration: llmModelHost ? {
+            basePath: llmModelHost,
+        } : undefined
     });
 
     if (!highlight.content.image) {
@@ -96,7 +119,7 @@ export async function invoke(highlight: Highlight, pdf: Blob, openaiApiKey: stri
         // ask the model to describe the image
         const llm = new ChatOpenAI({
             openAIApiKey: openaiApiKey,
-            model: "gpt-4o-mini",
+            model: llmModel,
         });
 
         const imageDescription = await llm.invoke([imageDescriptionMessage]);
