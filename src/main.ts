@@ -4,15 +4,12 @@ import { Buffer } from 'buffer'
 import { invoke, readOpenAiAPIKey, readEmbeddingModelHost, readEmbeddingModel, readLLMModelHost, readLLMModel, storePdfOnVectorStore } from "./openai";
 import { findPageProperty } from "./page";
 import { findHighlightFromEdnByUuid, findUuidOfCurrentLine, getPdfAndEdnByPdfPath } from "./pdf";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
 globalThis.Buffer = Buffer
 
 
 async function main() {
     settingUI();
-
-    let vectorStoreCache: Map<String, MemoryVectorStore> = new Map();
 
     logseq.Editor.registerSlashCommand(
         "ask pdf",
@@ -69,20 +66,7 @@ async function main() {
             ///////////////////////////////
             // upload pdf to langchain vec db
             ///////////////////////////////
-            let maybeVectorStore: MemoryVectorStore | undefined = undefined;
-            if (vectorStoreCache.has(pdfPath)) {
-                maybeVectorStore = vectorStoreCache.get(pdfPath);
-            }
-
-            if (!maybeVectorStore) {
-                console.log("new vector store created");
-                maybeVectorStore = await storePdfOnVectorStore(pdf, openaiApiKey, embeddingModelHost, embeddingModel);
-                vectorStoreCache.set(pdfPath, maybeVectorStore);
-            } else {
-                console.log("use vector store cache");
-            }
-
-            const vectorStore = maybeVectorStore;
+            const vectorStore = await storePdfOnVectorStore(pdf, openaiApiKey, embeddingModelHost, embeddingModel, pdfPath);
 
             ///////////////////////////////
             // ask to gpt

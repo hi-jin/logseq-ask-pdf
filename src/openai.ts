@@ -10,6 +10,16 @@ import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
+// 캐시를 위한 인터페이스 정의
+interface VectorStoreCache {
+    [key: string]: {
+        [embeddingModel: string]: MemoryVectorStore;
+    };
+}
+
+// 전역 캐시 객체 선언
+let vectorStoreCache: VectorStoreCache = {};
+
 export function readOpenAiAPIKey(): string | null {
     return (logseq.settings as any)["openaiApiKey"] ?? logseq.settings?.["openaiApiKey"] ?? null;
 }
@@ -30,7 +40,14 @@ export function readLLMModel(): string {
     return (logseq.settings as any)["llmModel"] ?? logseq.settings?.["llmModel"] ?? "gpt-4o-mini";
 }
 
-export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string, embeddingModelHost: string | null, embeddingModel: string) {
+export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string, embeddingModelHost: string | null, embeddingModel: string, pdfPath: string) {
+    // 캐시에서 벡터 스토어 확인
+    if (vectorStoreCache[pdfPath] && vectorStoreCache[pdfPath][embeddingModel]) {
+        console.log("Using cached vector store");
+        return vectorStoreCache[pdfPath][embeddingModel];
+    }
+
+    console.log("Creating new vector store");
     const embeddings = new OpenAIEmbeddings({
         openAIApiKey: openaiApiKey,
         model: embeddingModel,
@@ -47,6 +64,12 @@ export async function storePdfOnVectorStore(pdf: Blob, openaiApiKey: string, emb
         docs,
         embeddings,
     );
+
+    // 캐시에 벡터 스토어 저장
+    if (!vectorStoreCache[pdfPath]) {
+        vectorStoreCache[pdfPath] = {};
+    }
+    vectorStoreCache[pdfPath][embeddingModel] = vectorStore;
 
     return vectorStore;
 }
