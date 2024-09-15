@@ -22,6 +22,7 @@ A Logseq plugin that allows you to ask questions about PDF highlights (text or i
 - Supports asking both text and image highlights
 - Use the entire PDF as context
 - Seamless integration with Logseq's UI
+- Compatible with OpenAI API and local models that are OpenAI API-compatible
 
 ## Installation
 
@@ -35,7 +36,8 @@ A Logseq plugin that allows you to ask questions about PDF highlights (text or i
 Before using the plugin, you need to set up your OpenAI API key:
 
 1. Go to the plugin settings
-2. Enter your OpenAI API key in the designated field
+2. Enter your OpenAI API key or the API key for your local OpenAI-compatible model in the designated field
+3. (Optional) If using a local model, set the Embedding Model Host and LLM Model Host to your local server's URL
 
 ## Usage
 
