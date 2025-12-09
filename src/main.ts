@@ -52,28 +52,52 @@ async function main() {
             // parse current block & find highlights
             ///////////////////////////////
             const uuid = findUuidOfCurrentLine(currentBlock.content);
-            if (!uuid) {
-                await logseq.UI.showMsg(`Please check whether the highlight uuid is on current line.`, "warning");
-                return;
-            }
+            let inputData: any = null;
 
-            const highlight = findHighlightFromEdnByUuid(uuid, edn);
-            if (!highlight) {
-                await logseq.UI.showMsg(`Please check whether the highlight uuid is on current line.`, "warning");
-                return;
+            if (uuid) {
+                // Case 1: Question about a specific highlight
+                const highlight = findHighlightFromEdnByUuid(uuid, edn);
+                if (highlight) {
+                    inputData = highlight;
+                } else {
+                    // UUID found but no highlight data (should rarely happen if data is consistent)
+                    await logseq.UI.showMsg(`Highlight data not found for the referenced UUID.`, "warning");
+                    return;
+                }
+            } else {
+                // Case 2: Free text question (use the block content as the question)
+                const question = currentBlock.content.trim();
+                if (!question) {
+                    await logseq.UI.showMsg(`Please enter a question or select a highlight.`, "warning");
+                    return;
+                }
+                inputData = question;
             }
 
             ///////////////////////////////
             // upload pdf to langchain vec db
             ///////////////////////////////
-            const vectorStore = await storePdfOnVectorStore(pdf, openaiApiKey, embeddingModelHost, embeddingModel, pdfPath);
+            const loadingBlock = await logseq.Editor.insertBlock(currentBlock.uuid, "Preparing PDF context...");
+            
+            const vectorStore = await storePdfOnVectorStore(
+                pdf,
+                openaiApiKey,
+                embeddingModelHost,
+                embeddingModel,
+                pdfPath,
+                async (message) => {
+                    if (loadingBlock) {
+                        await logseq.Editor.updateBlock(loadingBlock.uuid, `[Status] ${message}`);
+                    }
+                }
+            );
 
             ///////////////////////////////
             // ask to gpt
             ///////////////////////////////
-            const loadingBlock = await logseq.Editor.insertBlock(currentBlock.uuid, "LOADING.....");
+            if (loadingBlock) await logseq.Editor.updateBlock(loadingBlock.uuid, "Thinking...");
 
-            const chatResponse = await invoke(highlight, pdf, openaiApiKey, llmModelHost, llmModel, vectorStore);
+            const chatResponse = await invoke(inputData, pdf, openaiApiKey, llmModelHost, llmModel, vectorStore);
 
             if (loadingBlock) await logseq.Editor.removeBlock(loadingBlock.uuid);
             if (chatResponse) {
